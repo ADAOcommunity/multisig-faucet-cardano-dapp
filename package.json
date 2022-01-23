@@ -1,14 +1,15 @@
 {
-  "name": "typescript-nextjs-starter",
-  "description": "A TypeScript starter for Next.js that includes all you need to build amazing projects",
+  "name": "multisig-faucet-cardano-dapp",
+  "description": "A multisig faucet for safe distribution of Cardano native assets",
   "version": "1.0.0",
   "private": true,
-  "author": "João Pedro Schmitz <hey@joaopedro.dev> (@jpedroschmitz)",
+  "author": "ADAO",
   "license": "MIT",
   "keywords": [
     "nextjs",
-    "starter",
-    "typescript"
+    "cardano",
+    "faucet",
+    "dapp"
   ],
   "scripts": {
     "dev": "next",
@@ -27,6 +28,8 @@
     ]
   },
   "dependencies": {
+    "@emurgo/cardano-serialization-lib-browser": "9.1.4",
+    "@emurgo/cardano-serialization-lib-nodejs": "9.1.4",
     "next": "12.0.8",
     "react": "17.0.2",
     "react-dom": "17.0.2"
