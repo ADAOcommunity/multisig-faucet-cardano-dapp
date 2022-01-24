@@ -1,24 +1,25 @@
 import React, { useState, useContext, Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
-import WalletContext from "../utils/WalletContext"
+import CardanoWallet, { Cardano } from "../cardano/cardano-wallet"
 import loader from '../cardano/cardano-wallet/loader'
 import { Buffer } from 'buffer'
 import { ChevronDownIcon } from '@heroicons/react/solid'
-
+let wallet
 const _Buffer = Buffer
 
 export default function WalletConnect() {
     let [address, setAddress] = useState('')
-    const walletCtx: any = useContext(WalletContext)
+    let [connected, setConnected] = useState(false)
+    let [walletState, setWalletState] = useState()
 
-    const setAddressBech32 = async (walletApi: any) => {
+    const setAddressBech32 = async (walletApi) => {
         if(walletApi) {
             await loader.load()
             const loaded = typeof loader !== 'undefined'
             console.log("loader")
             console.log(loaded)
             if(loaded) {
-                const loadedLoader : any = loader
+                const loadedLoader = loader
                 const address = (await walletApi.getUsedAddresses())[0]
                 const addReadable = loadedLoader.Cardano.Address.from_bytes(_Buffer.from(address, 'hex')).to_bech32()
                 console.log(addReadable)
@@ -27,8 +28,49 @@ export default function WalletConnect() {
         }
     }
 
-    const enableCardano = async (wallet: string = 'nami') => {
-        const win: any = window
+    const makeTx = async () => {
+        let blockfrostApiKey = {
+            0: "testnetRvOtxC8BHnZXiBvdeM9b3mLbi8KQPwzA", // testnet
+            1: "mainnetGHf1olOJblaj5LD8rcRudajSJGKRU6IL" // mainnet
+            }
+        
+        console.log("makeTx")
+        const S = await Cardano();
+        wallet = new CardanoWallet(
+                        S,
+                        walletState,
+                        blockfrostApiKey
+                    )
+        let utxos = await wallet.getUtxosHex();
+        const myAddress = await wallet.getAddress();
+        let netId = await wallet.getNetworkId();
+        console.log(netId)
+        const recipients = [{ "address": "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", "amount": "1" }]
+        console.log(recipients)
+
+        const t = await wallet.transaction({
+            PaymentAddress: myAddress,
+            recipients: recipients,
+            metadata: null,
+            utxosRaw: utxos,
+            networkId: netId.id,
+            ttl: 3600,
+            multiSig: undefined
+        })
+        console.log(t)
+        const signature = await wallet.signTx(t)
+        console.log(t, signature)
+        const txHash = await wallet.submitTx({
+            transactionRaw: t,
+            witnesses: [signature],
+
+            networkId: netId.id
+        })
+        console.log(txHash)
+    }
+
+    const enableCardano = async (wallet = 'nami') => {
+        const win = window
 
         if(!win.cardano) return
   
@@ -63,20 +105,33 @@ export default function WalletConnect() {
   
         if(!await baseWalletApi.isEnabled()) return
         else {
-            walletCtx.update({walletApi: fullWalletApi})
+            console.log(fullWalletApi)
+            // walletCtx.update({walletApi: fullWalletApi})
+            wallet = fullWalletApi
             await setAddressBech32(fullWalletApi)
+            setWalletState(fullWalletApi)
+            setConnected(true)
         }
     }
 
     return (
-        <>
+        <>  
+            {connected ? 
+                <button onClick={() => makeTx()} className="m-2 p-10 text-white rounded-xl transition-all duration-500 bg-gradient-to-br to-blue-500 via-black from-blue-900 bg-size-200 bg-pos-0 hover:bg-pos-100">
+                <h2>
+                    Claim
+                </h2>
+                </button> 
+                :
+                <></>
+            }
             <WalletDropdown enableWallet={enableCardano} address={address}/>
         </>
     )
 }
 
 
-function WalletDropdown({enableWallet, address} : {enableWallet: Function, address: string}) {
+function WalletDropdown({enableWallet, address}) {
     return (
       <Menu as="div" className="relative inline-block text-left">
         <Menu.Button

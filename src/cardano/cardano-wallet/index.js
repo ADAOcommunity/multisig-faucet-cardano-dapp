@@ -14,6 +14,7 @@ const ERROR = {
     TX_TOO_BIG: 'Transaction too big'
 }
 
+
 class CardanoWallet {
     constructor(serilizationLib, walletApi, apiKey) {
         this.apiKey  = apiKey
@@ -27,23 +28,30 @@ class CardanoWallet {
   }
 
 
-  async isEnabled() {
-    return await this.WalletApi.isEnabled()
-  }
+//   async isEnabled() {
+//     console.log("isEnabled")
+//     console.log("isEnabled")
+//     console.log("isEnabled")
+//     console.log(this.WalletApi)
+//     return await this.WalletApi.isEnabled()
+//   }
 
-  async enable() {
-    if (!await this.isEnabled()) {
-      try {
-        return await this.WalletApi.enable()
-      } catch (error) {
-        throw error
-      }
-    }
-  }
+//   async enable() {
+//     if (!await this.isEnabled()) {
+//       try {
+//         return await this.WalletApi.enable()
+//       } catch (error) {
+//         throw error
+//       }
+//     }
+//   }
 
   async getAddress() {
+    console.log("getAddress")
+
+    console.log(this.WalletApi)
     
-    if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
+    // if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
     
     const addressHex = Buffer.from(
         (await this.WalletApi.getUsedAddresses())[0],
@@ -69,7 +77,7 @@ class CardanoWallet {
   }
 
   async getNetworkId() {
-    if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
+    // if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
     let networkId = await this.WalletApi.getNetworkId()
     return {
       id: networkId,
@@ -80,9 +88,9 @@ class CardanoWallet {
 
   async getBalance (){
     // get balance of Nami Wallet
-    if (!this.isEnabled()) {
-        await this.enable()
-    }
+    // if (!this.isEnabled()) {
+    //     await this.enable()
+    // }
     let networkId = await this.getNetworkId(); 
     let protocolParameter = await this._getProtocolParameter(networkId.id)
 
@@ -189,6 +197,7 @@ class CardanoWallet {
 
 
     async getUtxosHex() {
+        console.log(this.WalletApi)
         return await this.WalletApi.getUtxos()
     }
 
@@ -375,7 +384,7 @@ class CardanoWallet {
 
 
     async signTx(transaction, partialSign = false) {
-        if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
+        // if (!this.isEnabled()) throw ERROR.NOT_CONNECTED;
         return await this.WalletApi.signTx(transaction, partialSign)
       }
     

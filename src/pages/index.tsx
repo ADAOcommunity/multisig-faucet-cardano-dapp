@@ -4,15 +4,21 @@ import WalletContext from "../utils/WalletContext"
 
 import styles from '@/styles/Home.module.css';
 
-import WalletConnect from '@/components/WalletConnect';
 import { useContext, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+let claimButton: any
 
 export default function Home() {
   const walletCtx: any = useContext(WalletContext)
-  const [connected, setConnected] = useState(false)
+  let [connected, setConnected] = useState(false)
+
+  const WalletConnect = dynamic(() => import('../components/WalletConnect'), {ssr: false});
 
   // useEffect(() => {
-  //   setConnected(walletCtx.walletApi !== null);
+  //   const connctd = walletCtx.walletApi !== null
+  //   setConnected(connctd);
+  //   if(connected) claimButton = dynamic(() => import('../components/ClaimButton').then((a: any) => a), {ssr: false});
   // }, [walletCtx])
 
   return (
@@ -24,12 +30,8 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        {walletCtx.walletApi !== null ? 
-          <button className="m-2 p-10 text-white rounded-xl transition-all duration-500 bg-gradient-to-br to-blue-500 via-black from-blue-900 bg-size-200 bg-pos-0 hover:bg-pos-100">
-            <h1 className={styles.title}>
-             Claim
-            </h1>
-          </button> 
+        {connected ? 
+          claimButton
           : 
           <>
             <h1 className={styles.title}>
