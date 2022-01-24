@@ -16,7 +16,7 @@ export default function Home() {
   // }, [walletCtx])
 
   return (
-    <div className={`${styles.container}  text-white transition-all duration-500 bg-gradient-to-tl from-purple-800 via-purple-600 to-purple-400 bg-size-200 bg-pos-0 hover:bg-pos-100`}>
+    <div className={`${styles.container}  text-white transition-all duration-500 bg-gradient-to-tl from-blue-400 via-blue-800 to-black bg-size-200 bg-pos-0 hover:bg-pos-100`}>
       <Head>
         <title>Faucet for Cardano native assets</title>
         <meta name="description" content="Faucet for Cardano native assets" />
@@ -25,7 +25,7 @@ export default function Home() {
 
       <main className={styles.main}>
         {walletCtx.walletApi !== null ? 
-          <button className="m-2 p-10 text-white rounded-xl transition-all duration-500 bg-gradient-to-br to-purple-900 via-black from-purple-400 bg-size-200 bg-pos-0 hover:bg-pos-100">
+          <button className="m-2 p-10 text-white rounded-xl transition-all duration-500 bg-gradient-to-br to-blue-500 via-black from-blue-900 bg-size-200 bg-pos-0 hover:bg-pos-100">
             <h1 className={styles.title}>
              Claim
             </h1>
