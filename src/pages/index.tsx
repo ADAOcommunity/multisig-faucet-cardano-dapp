@@ -13,7 +13,7 @@ export default function Home() {
   let [connected, setConnected] = useState(false)
 
   const WalletConnect = dynamic(() => import('../components/WalletConnect'), {ssr: false});
-
+  
   // useEffect(() => {
   //   const connctd = walletCtx.walletApi !== null
   //   console.log("connctd")

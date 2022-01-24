@@ -328,6 +328,7 @@ class CardanoWallet {
                 Utxos: utxos,
                 Outputs: outputs,
                 ProtocolParameter: protocolParameter,
+                multiSig: multiSig,
                 Metadata: metadata,
                 
                 Delegation: null
@@ -750,11 +751,11 @@ class CardanoWallet {
             )
         );
         if (multiSig) {
-        vkeys.add(
-            this.S.Vkeywitness.from_bytes(
-                Buffer.from(dummyVkeyWitness, "hex")
-            )
-        );
+            vkeys.add(
+                this.S.Vkeywitness.from_bytes(
+                    Buffer.from(dummyVkeyWitness, "hex")
+                )
+            );
             }
         witnesses.set_vkeys(vkeys);
 
@@ -824,7 +825,7 @@ class CardanoWallet {
         Utxos,
         Outputs,
         ProtocolParameter,
-
+        multiSig = false,
         metadata = null,
         
 
@@ -954,6 +955,31 @@ class CardanoWallet {
         txBuilder.add_change_if_needed(
             this.S.Address.from_bech32(PaymentAddress)
         );
+        // const witnesses = this.S.TransactionWitnessSet.new();
+
+        // const dummyVkeyWitness =
+        //     "8258208814c250f40bfc74d6c64f02fc75a54e68a9a8b3736e408d9820a6093d5e38b95840f04a036fa56b180af6537b2bba79cec75191dc47419e1fd8a4a892e7d84b7195348b3989c15f1e7b895c5ccee65a1931615b4bdb8bbbd01e6170db7a6831310c";
+
+        // const vkeys = this.S.Vkeywitnesses.new();
+        // vkeys.add(
+        //     this.S.Vkeywitness.from_bytes(
+        //         Buffer.from(dummyVkeyWitness, "hex")
+        //     )
+        // );
+
+        // vkeys.add(
+        //     this.S.Vkeywitness.from_bytes(
+        //         Buffer.from(dummyVkeyWitness, "hex")
+        //     )
+        // );
+        // if (multiSig) {
+        //     vkeys.add(
+        //         this.S.Vkeywitness.from_bytes(
+        //             Buffer.from(dummyVkeyWitness, "hex")
+        //         )
+        //     );
+        // }
+        // witnesses.set_vkeys(vkeys);
         const transaction = this.S.Transaction.new(
             txBuilder.build(),
             this.S.TransactionWitnessSet.new(),

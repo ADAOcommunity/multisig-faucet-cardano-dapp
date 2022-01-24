@@ -58,17 +58,13 @@ export default function WalletConnect() {
             utxosRaw: utxos,
             networkId: netId.id,
             ttl: 3600,
-            multiSig: undefined
+            multiSig: true
         })
         try {
             const signature = await wallet.signTx(t)
-            const txHash = await wallet.submitTx({
-                transactionRaw: t,
-                witnesses: [signature],
-    
-                networkId: netId.id
-            })
-            console.log(`txHash: ${txHash}`)
+            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.json())
+            wallet.submitTx({transactionRaw: t, witnesses: [signature], networkId: 1})
+            console.log(`txHash: ${res}`)
         }
         catch(err){
             console.log(err)

@@ -219,26 +219,27 @@ class CardanoWalletBackend {
         }
 
         const auxiliary_data = transaction.auxiliary_data()
-        
-        const _metadata = auxiliary_data.metadata()
         let metadata = {}
-        if (_metadata){
- 
-        const metadataKeys = _metadata.keys()
-        
-        for (let metadataKeyIndex of [...Array(metadataKeys.len()).keys()]){
-            const metadataKey = metadataKeys.get(metadataKeyIndex)
-            const metadataRaw = _metadata.get(metadataKey)
-            const metadataJson = JSON.parse(S.decode_metadatum_to_json_str(metadataRaw, 0))
-            metadata[metadataKey.to_str()] = metadataJson
-
+        if(auxiliary_data){
+            const _metadata = auxiliary_data.metadata()
+            if (_metadata){
+     
+                const metadataKeys = _metadata.keys()
+                
+                for (let metadataKeyIndex of [...Array(metadataKeys.len()).keys()]){
+                    const metadataKey = metadataKeys.get(metadataKeyIndex)
+                    const metadataRaw = _metadata.get(metadataKey)
+                    const metadataJson = JSON.parse(S.decode_metadatum_to_json_str(metadataRaw, 0))
+                    metadata[metadataKey.to_str()] = metadataJson
+    
+                }
+            }
         }
-        }
         
-        
-       
         Object.keys(txInputs).map((senderAddress) => {
-            if (recipients[senderAddress] != "undefined") {
+            if (typeof recipients[senderAddress] !== "undefined") {
+                // console.log("recipients[senderAddress]")
+                // console.log(recipients[senderAddress])
                 txInputs[senderAddress].amount -= recipients[senderAddress].amount;
                 recipients[senderAddress].amount = 0;
             
@@ -440,28 +441,32 @@ class CardanoWalletBackend {
         metadata = null
     }) {
 
-        
         let transaction = S.Transaction.from_bytes(Buffer.from(transactionRaw, "hex"))
-
 
         const txWitnesses = transaction.witness_set();
         const txVkeys = txWitnesses.vkeys();
         const txScripts = txWitnesses.native_scripts();
         const totalVkeys = S.Vkeywitnesses.new();
         const totalScripts = S.NativeScripts.new();
-
-
+        
+        console.log("witnesses")
+        console.log(witnesses)
         for (let witness of witnesses){
-        console.log(witness)
-        const addWitnesses = S.TransactionWitnessSet.from_bytes(
-            Buffer.from(witness, "hex")
-        );
-        const addVkeys = addWitnesses.vkeys();
-        if (addVkeys) {
-            for (let i = 0; i < addVkeys.len(); i++) {
-                totalVkeys.add(addVkeys.get(i));
+            console.log("witness")
+            console.log(witness)
+            const addWitnesses = S.TransactionWitnessSet.from_bytes(
+                Buffer.from(witness, "hex")
+            );
+            console.log("addWitnesses")
+            console.log(addWitnesses)
+            const addVkeys = addWitnesses.vkeys();
+            console.log("addVkeys")
+            console.log(addVkeys)
+            if (addVkeys) {
+                for (let i = 0; i < addVkeys.len(); i++) {
+                    totalVkeys.add(addVkeys.get(i));
+                }
             }
-        }
       
         }
       
