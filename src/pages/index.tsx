@@ -7,7 +7,6 @@ import styles from '@/styles/Home.module.css';
 import { useContext, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
-let claimButton: any
 
 export default function Home() {
   const walletCtx: any = useContext(WalletContext)
@@ -17,9 +16,11 @@ export default function Home() {
 
   // useEffect(() => {
   //   const connctd = walletCtx.walletApi !== null
+  //   console.log("connctd")
+  //   console.log(connctd)
   //   setConnected(connctd);
-  //   if(connected) claimButton = dynamic(() => import('../components/ClaimButton').then((a: any) => a), {ssr: false});
-  // }, [walletCtx])
+  //   return () => setConnected(false)
+  // }, [])
 
   return (
     <div className={`${styles.container}  text-white transition-all duration-500 bg-gradient-to-tl from-blue-400 via-blue-800 to-black bg-size-200 bg-pos-0 hover:bg-pos-100`}>
@@ -30,6 +31,9 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
+        {connected ? 
+          <></> 
+          :
           <>
             <h1 className={styles.title}>
               Welcome to Cardano native assets faucet
@@ -39,35 +43,34 @@ export default function Home() {
               Get started by connecting your wallet
             </p>
           </>
+        }
 
         <div className={styles.grid}>
           <WalletConnect/>
-
         </div>
       </main>
-
       <footer className={styles.footer}>
-        <a href="https://cardano.org" target="_blank" rel="noopener noreferrer">
-          Powered by{``}
-          <span className={styles.logo}>
+        Powered by{``}
+        <span >
+          <a href="https://cardano.org" target="_blank" rel="noopener noreferrer">
             <Image
               src="/cardano-logo.svg"
               alt="Cardano Logo"
               width={24}
               height={24}
             />
-          </span>
-          <br/>
-          
-          <span className={styles.logo}>
+          </a>
+        </span>
+        <span >
+          <a href="https://theadadao.com" target="_blank" rel="noopener noreferrer">
             <Image
               src="/adao-full-logo.svg"
               alt="Cardano Logo"
               width={24}
               height={24}
             />
-          </span>
-        </a>
+          </a>
+        </span>
       </footer>
     </div>
   );

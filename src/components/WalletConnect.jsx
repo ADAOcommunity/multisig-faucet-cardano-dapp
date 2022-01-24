@@ -4,6 +4,8 @@ import CardanoWallet, { Cardano } from "../cardano/cardano-wallet"
 import loader from '../cardano/cardano-wallet/loader'
 import { Buffer } from 'buffer'
 import { ChevronDownIcon } from '@heroicons/react/solid'
+// import WalletContext from '../utils/WalletContext'
+
 let wallet
 const _Buffer = Buffer
 
@@ -11,6 +13,7 @@ export default function WalletConnect() {
     let [address, setAddress] = useState('')
     let [connected, setConnected] = useState(false)
     let [walletState, setWalletState] = useState()
+    // const walletCtx = useContext(WalletContext)
 
     const setAddressBech32 = async (walletApi) => {
         if(walletApi) {
@@ -57,7 +60,6 @@ export default function WalletConnect() {
             ttl: 3600,
             multiSig: undefined
         })
-        
         try {
             const signature = await wallet.signTx(t)
             const txHash = await wallet.submitTx({
@@ -107,15 +109,20 @@ export default function WalletConnect() {
           default:
             break
         }
-  
+
         if(!await baseWalletApi.isEnabled()) return
         else {
             console.log(fullWalletApi)
-            // walletCtx.update({walletApi: fullWalletApi})
             wallet = fullWalletApi
-            await setAddressBech32(fullWalletApi)
             setWalletState(fullWalletApi)
             setConnected(true)
+            setAddressBech32(fullWalletApi)
+            // try{
+                // walletCtx.update({walletApi: fullWalletApi})
+            // } catch(err){ 
+            //     console.log("walletCtx")
+            //     console.log(walletCtx)
+            // }
         }
     }
 
