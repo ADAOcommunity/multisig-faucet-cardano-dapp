@@ -1,14 +1,14 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import WalletContext from "../utils/WalletContext"
 import loader from '../cardano/cardano-wallet/loader'
 import { Buffer } from 'buffer'
+import { ChevronDownIcon } from '@heroicons/react/solid'
 
 const _Buffer = Buffer
 
 export default function WalletConnect() {
     let [address, setAddress] = useState('')
-    let [connected, setConnected] = useState(false)
     const walletCtx: any = useContext(WalletContext)
 
     const setAddressBech32 = async (walletApi: any) => {
@@ -65,7 +65,6 @@ export default function WalletConnect() {
         else {
             walletCtx.update({walletApi: fullWalletApi})
             await setAddressBech32(fullWalletApi)
-            setConnected(true)
         }
     }
 
@@ -79,30 +78,59 @@ export default function WalletConnect() {
 
 function WalletDropdown({enableWallet, address} : {enableWallet: Function, address: string}) {
     return (
-      <Menu>
-        <Menu.Button>{address === '' ? 'Connect' : address}</Menu.Button>
-        <Transition
-            enter="transition duration-100 ease-out"
-            enterFrom="transform scale-95 opacity-0"
-            enterTo="transform scale-100 opacity-100"
-            leave="transition duration-75 ease-out"
-            leaveFrom="transform scale-100 opacity-100"
-            leaveTo="transform scale-95 opacity-0"
+      <Menu as="div" className="relative inline-block text-left">
+        <Menu.Button
+            className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-black rounded-md bg-opacity-20 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         >
-            <Menu.Items>
+            <h2 style={{overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", maxWidth: "60vw"}}>
+                {address === '' ? 'Connect' : address}
+            </h2>
+            <ChevronDownIcon
+              className="w-5 h-5 ml-2 -mr-1 text-violet-200 hover:text-violet-100"
+              aria-hidden="true"
+            />
+        </Menu.Button>
+        <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+        >
+            <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <Menu.Item>
                     {({ active }) => (
-                    <div className={`${active && 'bg-blue-500'}`} onClick={() => enableWallet('nami')}>Nami</div>
+                        <button className={`${
+                            active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                            } group flex rounded-md items-center w-full px-2 py-2 text-sm`} 
+                            onClick={() => enableWallet('nami')}
+                        >
+                            Nami
+                        </button>
                     )}
                 </Menu.Item>
                 <Menu.Item>
                     {({ active }) => (
-                    <div className={`${active && 'bg-blue-500'}`} onClick={() => enableWallet('ccvault')}>ccvault</div>
+                    <button className={`${
+                        active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                        } group flex rounded-md items-center w-full px-2 py-2 text-sm`} 
+                        onClick={() => enableWallet('ccvault')}
+                    >
+                        ccvault
+                    </button>
                     )}
                 </Menu.Item>
                 <Menu.Item>
                     {({ active }) => (
-                    <div className={`${active && 'bg-blue-500'}`} onClick={() => enableWallet('flint')}>Flint</div>
+                    <button className={`${
+                        active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                        } group flex rounded-md items-center w-full px-2 py-2 text-sm`} 
+                        onClick={() => enableWallet('flint')}
+                    >
+                        Flint
+                    </button>
                     )}
                 </Menu.Item>
             </Menu.Items>
