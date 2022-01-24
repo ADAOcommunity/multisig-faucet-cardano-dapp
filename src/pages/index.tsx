@@ -39,9 +39,6 @@ export default function Home() {
               Welcome to Cardano native assets faucet
             </h1>
 
-            <p className={styles.description}>
-              Get started by connecting your wallet
-            </p>
           </>
         }
 
