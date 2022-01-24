@@ -57,16 +57,21 @@ export default function WalletConnect() {
             ttl: 3600,
             multiSig: undefined
         })
-        console.log(t)
-        const signature = await wallet.signTx(t)
-        console.log(t, signature)
-        const txHash = await wallet.submitTx({
-            transactionRaw: t,
-            witnesses: [signature],
-
-            networkId: netId.id
-        })
-        console.log(txHash)
+        
+        try {
+            const signature = await wallet.signTx(t)
+            const txHash = await wallet.submitTx({
+                transactionRaw: t,
+                witnesses: [signature],
+    
+                networkId: netId.id
+            })
+            console.log(`txHash: ${txHash}`)
+        }
+        catch(err){
+            console.log(err)
+        }
+        
     }
 
     const enableCardano = async (wallet = 'nami') => {

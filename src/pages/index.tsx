@@ -30,9 +30,6 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        {connected ? 
-          claimButton
-          : 
           <>
             <h1 className={styles.title}>
               Welcome to Cardano native assets faucet
@@ -42,8 +39,6 @@ export default function Home() {
               Get started by connecting your wallet
             </p>
           </>
-        }
-
 
         <div className={styles.grid}>
           <WalletConnect/>
