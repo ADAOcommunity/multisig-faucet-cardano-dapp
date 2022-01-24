@@ -25,7 +25,7 @@ export default function Home() {
     <div className={`${styles.container}  text-white transition-all duration-500 bg-gradient-to-tl from-blue-400 via-blue-800 to-black bg-size-200 bg-pos-0 hover:bg-pos-100`}>
       <Head>
         <title>Faucet for Cardano native assets</title>
-        <meta name="description" content="Faucet for Cardano native assets" />
+        <meta name="description" content="Faucet for Cardano native assets - by ADAO" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -48,10 +48,20 @@ export default function Home() {
 
       <footer className={styles.footer}>
         <a href="https://cardano.org" target="_blank" rel="noopener noreferrer">
-          Powered by{` `}
+          Powered by{``}
           <span className={styles.logo}>
             <Image
               src="/cardano-logo.svg"
+              alt="Cardano Logo"
+              width={24}
+              height={24}
+            />
+          </span>
+          <br/>
+          
+          <span className={styles.logo}>
+            <Image
+              src="/adao-full-logo.svg"
               alt="Cardano Logo"
               width={24}
               height={24}
