@@ -29,6 +29,7 @@
 - 👷 PR Workflow — Run Type Check & Linters on all Pull Requests
 - ⚙️ EditorConfig - Maintain consistent coding styles across editors and IDEs
 - 🗂 Path Mapping — Import components or images using the `@` prefix
+- Tailwind css
 - Cardano <a href="https://cips.cardano.org/cips/cip30/">cip30</a> enabled wallets
 
 ## Quick Start
