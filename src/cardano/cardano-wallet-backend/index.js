@@ -518,7 +518,13 @@ class CardanoWalletBackend {
             networkId: networkId,
             method: "POST"
         });
-        
+        // const txhash = await fetch('https://submit-api.mainnet.dandelion.link/api/submit/tx', {
+        //     headers: {
+        //         "Content-Type": "application/cbor"
+        //     },
+        //     body: Buffer.from(signedTx.to_bytes(), "hex"),
+        //     method: "POST"
+        // })
         return txhash
 
     }

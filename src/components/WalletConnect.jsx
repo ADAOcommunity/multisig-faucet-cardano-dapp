@@ -48,21 +48,42 @@ export default function WalletConnect() {
         const myAddress = await wallet.getAddress();
         let netId = await wallet.getNetworkId();
         console.log(netId)
-        const recipients = [{ "address": "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", "amount": "1" }]
+        // const recipients = [{ "address": "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", "amount": "1" }]
+        let recipients = [
+            {address: "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", amount: "1"}, // Seller Wallet, NFT price 10ADA
+            {address: `${myAddress}`,  amount: "0",
+             mintedAssets:[{"assetName":"TestADAONFT","quantity":"1",
+            "policyId":"10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8","policyScript":"8201828200581c77491199a0c7465bdf3b330b4d941888b0e8770093b2a99a9fd8595282051a03141d50"}]} // NFTs to be minted
+            ]
+
+        let dummyMetadata = {
+            "721": {
+                "10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8": {
+                  "TestADAONFT": {
+                    "name":"TestADAONFT",
+                    "description":"This is a test TestADAONFT",
+                    "image":"ipfs://QmXLFXBRwRSodmxmGiEQ8d5u9jqMZxhUD5Umx5mdM3mNZp"
+                  }
+              }
+            }
+        }
+
         console.log(recipients)
 
         const t = await wallet.transaction({
             PaymentAddress: myAddress,
-            recipients: recipients,
-            metadata: null,
             utxosRaw: utxos,
+            recipients: recipients,
+            metadata: dummyMetadata,
+            metadataHash: 'd1dec0a6c05fe16a95faa907dd5f873b67074a823eaf6337bfe408a0df7e53fa',
+            addMetadata: false,
+            multiSig: true,
             networkId: netId.id,
-            ttl: 3600,
-            multiSig: true
+            ttl: 3600
         })
         try {
-            const signature = await wallet.signTx(t)
-            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.json())
+            const signature = await wallet.signTx(t, true)
+            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.text())
             // const txhash = await wallet.submitTx({transactionRaw: t, witnesses: [signature], networkId: 1})
             console.log(`txHash: ${res}`)
         }
