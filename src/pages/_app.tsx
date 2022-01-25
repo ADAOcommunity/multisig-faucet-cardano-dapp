@@ -1,17 +1,17 @@
 import { AppProps } from 'next/app';
 import '@/styles/global.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import WalletContext from '@/utils/WalletContext';
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const [state, setState] = useState({
     walletApi: null,
-    update
-  })
-
+    update,
+  });
   function update(data: any) {
     setState(Object.assign({}, state, data));
   }
+
 
   // useEffect(() => {
   //     return () => {
@@ -19,9 +19,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   //     };
   // }, []);
 
-  return <>
-          <WalletContext.Provider value={state}>
-            <Component {...pageProps} />
-          </WalletContext.Provider>
-        </>
+  return (
+    <>
+      <WalletContext.Provider value={state}>
+        <Component {...pageProps} />
+      </WalletContext.Provider>
+    </>
+  );
 }

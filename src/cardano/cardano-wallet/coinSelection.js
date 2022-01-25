@@ -2,9 +2,9 @@ import {
   TransactionUnspentOutput,
   TransactionOutputs,
   Value,
-} from "@emurgo/cardano-serialization-lib-browser/cardano_serialization_lib";
-import Loader from "./loader";
-const BigInt = typeof window !== "undefined" && window.BigInt;
+} from '@emurgo/cardano-serialization-lib-browser/cardano_serialization_lib';
+import Loader from './loader';
+const BigInt = typeof window !== 'undefined' && window.BigInt;
 /**
  * BerryPool implementation of the __Random-Improve__ coin selection algorithm.
  *
@@ -226,7 +226,7 @@ const CoinSelection = {
   randomImprove: async (inputs, outputs, limit) => {
     if (!protocolParameters)
       throw new Error(
-        "Protocol parameters not set. Use setProtocolParameters()."
+        'Protocol parameters not set. Use setProtocolParameters().',
       );
 
     await Loader.load();
@@ -239,7 +239,7 @@ const CoinSelection = {
       selection: [],
       remaining: [...inputs], // Shallow copy
       subset: [],
-      amount: Loader.Cardano.Value.new(Loader.Cardano.BigNum.from_str("0")),
+      amount: Loader.Cardano.Value.new(Loader.Cardano.BigNum.from_str('0')),
     };
 
     let mergedOutputsAmounts = mergeOutputsAmounts(outputs);
@@ -256,16 +256,16 @@ const CoinSelection = {
           cloneUTxOSelection(utxoSelection), // Deep copy in case of fallback needed
           output,
           limit - utxoSelection.selection.length,
-          _minUTxOValue
+          _minUTxOValue,
         );
       } catch (e) {
-        if (e.message === "INPUT_LIMIT_EXCEEDED") {
+        if (e.message === 'INPUT_LIMIT_EXCEEDED') {
           // Limit reached : Fallback on DescOrdAlgo
           utxoSelection = descSelect(
             utxoSelection,
             output,
             limit - utxoSelection.selection.length,
-            _minUTxOValue
+            _minUTxOValue,
           );
         } else {
           throw e;
@@ -281,12 +281,12 @@ const CoinSelection = {
 
       let range = {};
       range.ideal = Loader.Cardano.Value.new(
-        Loader.Cardano.BigNum.from_str("0")
+        Loader.Cardano.BigNum.from_str('0'),
       )
         .checked_add(output)
         .checked_add(output);
       range.maximum = Loader.Cardano.Value.new(
-        Loader.Cardano.BigNum.from_str("0")
+        Loader.Cardano.BigNum.from_str('0'),
       )
         .checked_add(range.ideal)
         .checked_add(output);
@@ -295,7 +295,7 @@ const CoinSelection = {
         utxoSelection,
         output,
         limit - utxoSelection.selection.length,
-        range
+        range,
       );
     });
 
@@ -335,14 +335,14 @@ function randomSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
   }
 
   if (limit <= 0) {
-    throw new Error("INPUT_LIMIT_EXCEEDED");
+    throw new Error('INPUT_LIMIT_EXCEEDED');
   }
 
   if (nbFreeUTxO <= 0) {
     if (isQtyFulfilled(outputAmount, utxoSelection.amount, 0, 0)) {
-      throw new Error("MIN_UTXO_ERROR");
+      throw new Error('MIN_UTXO_ERROR');
     }
-    throw new Error("INPUTS_EXHAUSTED");
+    throw new Error('INPUTS_EXHAUSTED');
   }
 
   /** @type {TransactionUnspentOutput} utxo */
@@ -353,7 +353,7 @@ function randomSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
   utxoSelection.selection.push(utxo);
   utxoSelection.amount = addAmounts(
     utxo.output().amount(),
-    utxoSelection.amount
+    utxoSelection.amount,
   );
 
   return randomSelect(utxoSelection, outputAmount, limit - 1, minUTxOValue);
@@ -373,19 +373,19 @@ function randomSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
 function descSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
   // Sort UTxO subset in DESC order for required Output unit type
   utxoSelection.subset = utxoSelection.subset.sort((utxoA, utxoB) =>
-    utxoB.output().amount().compare(utxoA.output().amount())
+    utxoB.output().amount().compare(utxoA.output().amount()),
   );
 
   do {
     if (limit <= 0) {
-      throw new Error("INPUT_LIMIT_EXCEEDED");
+      throw new Error('INPUT_LIMIT_EXCEEDED');
     }
 
     if (utxoSelection.subset.length <= 0) {
       if (isQtyFulfilled(outputAmount, utxoSelection.amount, 0, 0)) {
-        throw new Error("MIN_UTXO_ERROR");
+        throw new Error('MIN_UTXO_ERROR');
       }
-      throw new Error("INPUTS_EXHAUSTED");
+      throw new Error('INPUTS_EXHAUSTED');
     }
 
     /** @type {TransactionUnspentOutput} utxo */
@@ -394,7 +394,7 @@ function descSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
     utxoSelection.selection.push(utxo);
     utxoSelection.amount = addAmounts(
       utxo.output().amount(),
-      utxoSelection.amount
+      utxoSelection.amount,
     );
 
     limit--;
@@ -403,7 +403,7 @@ function descSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
       outputAmount,
       utxoSelection.amount,
       minUTxOValue,
-      utxoSelection.subset.length - 1
+      utxoSelection.subset.length - 1,
     )
   );
 
@@ -448,7 +448,7 @@ function improve(utxoSelection, outputAmount, limit, range) {
     .pop();
 
   const newAmount = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str("0")
+    Loader.Cardano.BigNum.from_str('0'),
   )
     .checked_add(utxo.output().amount())
     .checked_add(outputAmount);
@@ -461,7 +461,7 @@ function improve(utxoSelection, outputAmount, limit, range) {
     utxoSelection.selection.push(utxo);
     utxoSelection.amount = addAmounts(
       utxo.output().amount(),
-      utxoSelection.amount
+      utxoSelection.amount,
     );
     limit--;
   } else {
@@ -478,13 +478,13 @@ function improve(utxoSelection, outputAmount, limit, range) {
  */
 function mergeOutputsAmounts(outputs) {
   let compiledAmountList = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str("0")
+    Loader.Cardano.BigNum.from_str('0'),
   );
 
   for (let i = 0; i < outputs.len(); i++) {
     compiledAmountList = addAmounts(
       outputs.get(i).amount(),
-      compiledAmountList
+      compiledAmountList,
     );
   }
 
@@ -523,17 +523,17 @@ function splitAmounts(amounts) {
         _assets.insert(
           Loader.Cardano.AssetName.from_bytes(assetName.to_bytes()),
           Loader.Cardano.BigNum.from_bytes(
-            mA.get(scriptHash).get(assetName).to_bytes()
-          )
+            mA.get(scriptHash).get(assetName).to_bytes(),
+          ),
         );
 
         let _multiasset = Loader.Cardano.MultiAsset.new();
         _multiasset.insert(
           Loader.Cardano.ScriptHash.from_bytes(scriptHash.to_bytes()),
-          _assets
+          _assets,
         );
         let _value = Loader.Cardano.Value.new(
-          Loader.Cardano.BigNum.from_str("0")
+          Loader.Cardano.BigNum.from_str('0'),
         );
         _value.set_multiasset(_multiasset);
 
@@ -543,13 +543,13 @@ function splitAmounts(amounts) {
   }
 
   // Order assets by qty DESC
-  splitAmounts = sortAmountList(splitAmounts, "DESC");
+  splitAmounts = sortAmountList(splitAmounts, 'DESC');
 
   // Insure lovelace is last to account for min ada requirement
   splitAmounts.push(
     Loader.Cardano.Value.new(
-      Loader.Cardano.BigNum.from_bytes(amounts.coin().to_bytes())
-    )
+      Loader.Cardano.BigNum.from_bytes(amounts.coin().to_bytes()),
+    ),
   );
 
   return splitAmounts;
@@ -561,9 +561,9 @@ function splitAmounts(amounts) {
  * @param {string} [sortOrder=ASC] - Order
  * @return {AmountList} - The sorted AmountList
  */
-function sortAmountList(amountList, sortOrder = "ASC") {
+function sortAmountList(amountList, sortOrder = 'ASC') {
   return amountList.sort((a, b) => {
-    let sortInt = sortOrder === "DESC" ? BigInt(-1) : BigInt(1);
+    let sortInt = sortOrder === 'DESC' ? BigInt(-1) : BigInt(1);
     return Number((getAmountValue(a) - getAmountValue(b)) * sortInt);
   });
 }
@@ -598,14 +598,14 @@ function createSubSet(utxoSelection, output) {
     utxoSelection.remaining.forEach((utxo, index) => {
       if (output.compare(utxo.output().amount()) !== undefined) {
         utxoSelection.subset.push(
-          utxoSelection.remaining.splice(index, 1).pop()
+          utxoSelection.remaining.splice(index, 1).pop(),
         );
       }
     });
   } else {
     utxoSelection.subset = utxoSelection.remaining.splice(
       0,
-      utxoSelection.remaining.length
+      utxoSelection.remaining.length,
     );
   }
 }
@@ -622,7 +622,7 @@ function isQtyFulfilled(
   outputAmount,
   cumulatedAmount,
   minUTxOValue,
-  nbFreeUTxO
+  nbFreeUTxO,
 ) {
   let amount = outputAmount;
 
@@ -630,8 +630,8 @@ function isQtyFulfilled(
     let minAmount = Loader.Cardano.Value.new(
       Loader.Cardano.min_ada_required(
         cumulatedAmount,
-        Loader.Cardano.BigNum.from_str(minUTxOValue.toString())
-      )
+        Loader.Cardano.BigNum.from_str(minUTxOValue.toString()),
+      ),
     );
 
     // Lovelace min amount to cover assets and number of output need to be met
@@ -641,8 +641,8 @@ function isQtyFulfilled(
     if (outputAmount.compare(minAmount) < 0) {
       amount = minAmount.checked_add(
         Loader.Cardano.Value.new(
-          Loader.Cardano.BigNum.from_str(protocolParameters.minUTxO)
-        )
+          Loader.Cardano.BigNum.from_str(protocolParameters.minUTxO),
+        ),
       );
     }
 
@@ -654,7 +654,7 @@ function isQtyFulfilled(
         BigInt(protocolParameters.minFeeB);
 
       maxFee = Loader.Cardano.Value.new(
-        Loader.Cardano.BigNum.from_str(maxFee.toString())
+        Loader.Cardano.BigNum.from_str(maxFee.toString()),
       );
 
       amount = amount.checked_add(maxFee);
@@ -685,7 +685,7 @@ function cloneUTxOSelection(utxoSelection) {
  */
 const cloneUTxOList = (utxoList) =>
   utxoList.map((utxo) =>
-    Loader.Cardano.TransactionUnspentOutput.from_bytes(utxo.to_bytes())
+    Loader.Cardano.TransactionUnspentOutput.from_bytes(utxo.to_bytes()),
   );
 
 /**

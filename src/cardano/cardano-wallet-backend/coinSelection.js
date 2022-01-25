@@ -1,17 +1,16 @@
-
-var { TransactionUnspentOutput,
+var {
+  TransactionUnspentOutput,
   TransactionOutputs,
-  Value } = require('@emurgo/cardano-serialization-lib-nodejs')
+  Value,
+} = require('@emurgo/cardano-serialization-lib-nodejs');
 
 /**
  * Copied directly from Nami wallet github repo
  * small changes to make it compatible
- *  
+ *
  */
 
-
-
-let Loader = null
+let Loader = null;
 
 // HELPER
 
@@ -34,19 +33,19 @@ function createSubSet(utxoSelection, output) {
   } else {
     utxoSelection.subset = utxoSelection.remaining.splice(
       0,
-      utxoSelection.remaining.length
+      utxoSelection.remaining.length,
     );
   }
 }
 function mergeOutputsAmounts(outputs) {
   let compiledAmountList = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str('0')
+    Loader.Cardano.BigNum.from_str('0'),
   );
 
   for (let i = 0; i < outputs.len(); i++) {
     compiledAmountList = addAmounts(
       outputs.get(i).amount(),
-      compiledAmountList
+      compiledAmountList,
     );
   }
 
@@ -56,7 +55,6 @@ function mergeOutputsAmounts(outputs) {
 function addAmounts(amounts, compiledAmounts) {
   return compiledAmounts.checked_add(amounts);
 }
-
 
 function splitAmounts(amounts) {
   let splitAmounts = [];
@@ -74,17 +72,17 @@ function splitAmounts(amounts) {
         _assets.insert(
           Loader.Cardano.AssetName.from_bytes(assetName.to_bytes()),
           Loader.Cardano.BigNum.from_bytes(
-            mA.get(scriptHash).get(assetName).to_bytes()
-          )
+            mA.get(scriptHash).get(assetName).to_bytes(),
+          ),
         );
 
         let _multiasset = Loader.Cardano.MultiAsset.new();
         _multiasset.insert(
           Loader.Cardano.ScriptHash.from_bytes(scriptHash.to_bytes()),
-          _assets
+          _assets,
         );
         let _value = Loader.Cardano.Value.new(
-          Loader.Cardano.BigNum.from_str('0')
+          Loader.Cardano.BigNum.from_str('0'),
         );
         _value.set_multiasset(_multiasset);
 
@@ -99,8 +97,8 @@ function splitAmounts(amounts) {
   // Insure lovelace is last to account for min ada requirement
   splitAmounts.push(
     Loader.Cardano.Value.new(
-      Loader.Cardano.BigNum.from_bytes(amounts.coin().to_bytes())
-    )
+      Loader.Cardano.BigNum.from_bytes(amounts.coin().to_bytes()),
+    ),
   );
 
   return splitAmounts;
@@ -129,14 +127,13 @@ function getAmountValue(amount) {
 
 function cloneUTxOList(utxoList) {
   return utxoList.map((utxo) => {
-    return Loader.Cardano.TransactionUnspentOutput.from_bytes(utxo.to_bytes())
-  }
-  );
+    return Loader.Cardano.TransactionUnspentOutput.from_bytes(utxo.to_bytes());
+  });
 }
 
-function cloneValue(value) { return Loader.Cardano.Value.from_bytes(value.to_bytes()); }
-
-
+function cloneValue(value) {
+  return Loader.Cardano.Value.from_bytes(value.to_bytes());
+}
 
 function improve(utxoSelection, outputAmount, limit, range) {
   let nbFreeUTxO = utxoSelection.subset.length;
@@ -162,20 +159,20 @@ function improve(utxoSelection, outputAmount, limit, range) {
     .pop();
 
   const newAmount = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str('0')
+    Loader.Cardano.BigNum.from_str('0'),
   )
     .checked_add(utxo.output().amount())
     .checked_add(outputAmount);
 
   if (
     abs(getAmountValue(range.ideal) - getAmountValue(newAmount)) <
-    abs(getAmountValue(range.ideal) - getAmountValue(outputAmount)) &&
+      abs(getAmountValue(range.ideal) - getAmountValue(outputAmount)) &&
     compare(newAmount, range.maximum) <= 0
   ) {
     utxoSelection.selection.push(utxo);
     utxoSelection.amount = addAmounts(
       utxo.output().amount(),
-      utxoSelection.amount
+      utxoSelection.amount,
     );
     limit--;
   } else {
@@ -184,8 +181,6 @@ function improve(utxoSelection, outputAmount, limit, range) {
 
   return improve(utxoSelection, outputAmount, limit, range);
 }
-
-
 
 function searchAmountValue(needle, haystack) {
   let val = BigInt(0);
@@ -208,7 +203,6 @@ function searchAmountValue(needle, haystack) {
 }
 
 function cloneUTxOSelection(utxoSelection) {
-  
   return {
     selection: cloneUTxOList(utxoSelection.selection),
     remaining: cloneUTxOList(utxoSelection.remaining),
@@ -235,10 +229,10 @@ function compare(group, candidate) {
         group.multiasset().get(cScriptHash).get(cAssetName)
       ) {
         gQty = BigInt(
-          group.multiasset().get(cScriptHash).get(cAssetName).to_str()
+          group.multiasset().get(cScriptHash).get(cAssetName).to_str(),
         );
         cQty = BigInt(
-          candidate.multiasset().get(cScriptHash).get(cAssetName).to_str()
+          candidate.multiasset().get(cScriptHash).get(cAssetName).to_str(),
         );
       } else {
         return undefined;
@@ -255,12 +249,11 @@ class CoinSelection {
     this.protocolParameters = null;
   }
 
-
   setLoader(lib) {
     Loader = {
-      Cardano: lib
-    }
-  };
+      Cardano: lib,
+    };
+  }
 
   setProtocolParameters(minUTxO, minFeeA, minFeeB, maxTxSize) {
     this.protocolParameters = {
@@ -274,7 +267,7 @@ class CoinSelection {
   randomImprove(inputs, outputs, limit) {
     if (!this.protocolParameters)
       throw new Error(
-        'Protocol parameters not set. Use setthis.protocolParameters().'
+        'Protocol parameters not set. Use setthis.protocolParameters().',
       );
 
     //await Loader.load();
@@ -298,12 +291,12 @@ class CoinSelection {
     // Phase 1: Select enough input
     for (let i = 0; i < splitOutputsAmounts.length; i++) {
       createSubSet(utxoSelection, splitOutputsAmounts[i]); // Narrow down for NatToken UTxO
-      
+
       utxoSelection = this.select(
         utxoSelection,
         splitOutputsAmounts[i],
         limit,
-        _minUTxOValue
+        _minUTxOValue,
       );
     }
 
@@ -315,12 +308,12 @@ class CoinSelection {
 
       let range = {};
       range.ideal = Loader.Cardano.Value.new(
-        Loader.Cardano.BigNum.from_str('0')
+        Loader.Cardano.BigNum.from_str('0'),
       )
         .checked_add(splitOutputsAmounts[i])
         .checked_add(splitOutputsAmounts[i]);
       range.maximum = Loader.Cardano.Value.new(
-        Loader.Cardano.BigNum.from_str('0')
+        Loader.Cardano.BigNum.from_str('0'),
       )
         .checked_add(range.ideal)
         .checked_add(splitOutputsAmounts[i]);
@@ -329,7 +322,7 @@ class CoinSelection {
         utxoSelection,
         splitOutputsAmounts[i],
         limit - utxoSelection.selection.length,
-        range
+        range,
       );
     }
 
@@ -339,17 +332,17 @@ class CoinSelection {
     let minAmount = Loader.Cardano.Value.new(
       Loader.Cardano.min_ada_required(
         change,
-        Loader.Cardano.BigNum.from_str(this.protocolParameters.minUTxO)
-      )
+        Loader.Cardano.BigNum.from_str(this.protocolParameters.minUTxO),
+      ),
     );
 
     let maxFee =
       BigInt(this.protocolParameters.minFeeA) *
-      BigInt(this.protocolParameters.maxTxSize) +
+        BigInt(this.protocolParameters.maxTxSize) +
       BigInt(this.protocolParameters.minFeeB);
 
     maxFee = Loader.Cardano.Value.new(
-      Loader.Cardano.BigNum.from_str(maxFee.toString())
+      Loader.Cardano.BigNum.from_str(maxFee.toString()),
     );
 
     minAmount = minAmount.checked_add(maxFee);
@@ -373,17 +366,13 @@ class CoinSelection {
     };
   }
 
-
-
   select(utxoSelection, outputAmount, limit, minUTxOValue) {
     try {
-      
-
       utxoSelection = this.randomSelect(
         cloneUTxOSelection(utxoSelection), // Deep copy in case of fallback needed
         outputAmount,
         limit - utxoSelection.selection.length,
-        minUTxOValue
+        minUTxOValue,
       );
     } catch (e) {
       if (e.message === 'INPUT_LIMIT_EXCEEDED') {
@@ -392,7 +381,7 @@ class CoinSelection {
           utxoSelection,
           outputAmount,
           limit - utxoSelection.selection.length,
-          minUTxOValue
+          minUTxOValue,
         );
       } else {
         throw e;
@@ -403,12 +392,16 @@ class CoinSelection {
   }
 
   randomSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
-
     let nbFreeUTxO = utxoSelection.subset.length;
-    
+
     // If quantity is met, return subset into remaining list and exit
     if (
-      this.isQtyFulfilled(outputAmount, utxoSelection.amount, minUTxOValue, nbFreeUTxO)
+      this.isQtyFulfilled(
+        outputAmount,
+        utxoSelection.amount,
+        minUTxOValue,
+        nbFreeUTxO,
+      )
     ) {
       utxoSelection.remaining = [
         ...utxoSelection.remaining,
@@ -437,10 +430,15 @@ class CoinSelection {
     utxoSelection.selection.push(utxo);
     utxoSelection.amount = addAmounts(
       utxo.output().amount(),
-      utxoSelection.amount
+      utxoSelection.amount,
     );
 
-    return this.randomSelect(utxoSelection, outputAmount, limit - 1, minUTxOValue);
+    return this.randomSelect(
+      utxoSelection,
+      outputAmount,
+      limit - 1,
+      minUTxOValue,
+    );
   }
 
   descSelect(utxoSelection, outputAmount, limit, minUTxOValue) {
@@ -448,7 +446,7 @@ class CoinSelection {
     utxoSelection.subset = utxoSelection.subset.sort((a, b) => {
       return Number(
         searchAmountValue(outputAmount, b.output().amount()) -
-        searchAmountValue(outputAmount, a.output().amount())
+          searchAmountValue(outputAmount, a.output().amount()),
       );
     });
 
@@ -470,7 +468,7 @@ class CoinSelection {
       utxoSelection.selection.push(utxo);
       utxoSelection.amount = addAmounts(
         utxo.output().amount(),
-        utxoSelection.amount
+        utxoSelection.amount,
       );
 
       limit--;
@@ -479,7 +477,7 @@ class CoinSelection {
         outputAmount,
         utxoSelection.amount,
         minUTxOValue,
-        utxoSelection.subset.length - 1
+        utxoSelection.subset.length - 1,
       )
     );
 
@@ -493,23 +491,15 @@ class CoinSelection {
     return utxoSelection;
   }
 
-
-
-
-  isQtyFulfilled(
-    outputAmount,
-    cumulatedAmount,
-    minUTxOValue,
-    nbFreeUTxO
-  ) {
+  isQtyFulfilled(outputAmount, cumulatedAmount, minUTxOValue, nbFreeUTxO) {
     let amount = outputAmount;
 
     if (minUTxOValue && BigInt(outputAmount.coin().to_str()) > 0) {
       let minAmount = Loader.Cardano.Value.new(
         Loader.Cardano.min_ada_required(
           cumulatedAmount,
-          Loader.Cardano.BigNum.from_str(minUTxOValue.toString())
-        )
+          Loader.Cardano.BigNum.from_str(minUTxOValue.toString()),
+        ),
       );
 
       // Lovelace min amount to cover assets and number of output need to be met
@@ -519,8 +509,8 @@ class CoinSelection {
       if (compare(outputAmount, minAmount) < 0) {
         amount = minAmount.checked_add(
           Loader.Cardano.Value.new(
-            Loader.Cardano.BigNum.from_str(this.protocolParameters.minUTxO)
-          )
+            Loader.Cardano.BigNum.from_str(this.protocolParameters.minUTxO),
+          ),
         );
       }
 
@@ -528,11 +518,11 @@ class CoinSelection {
       if (nbFreeUTxO > 0) {
         let maxFee =
           BigInt(this.protocolParameters.minFeeA) *
-          BigInt(this.protocolParameters.maxTxSize) +
+            BigInt(this.protocolParameters.maxTxSize) +
           BigInt(this.protocolParameters.minFeeB);
 
         maxFee = Loader.Cardano.Value.new(
-          Loader.Cardano.BigNum.from_str(maxFee.toString())
+          Loader.Cardano.BigNum.from_str(maxFee.toString()),
         );
 
         amount = amount.checked_add(maxFee);
@@ -541,11 +531,6 @@ class CoinSelection {
 
     return compare(cumulatedAmount, amount) >= 0;
   }
-
-
-
-
-
-};
+}
 const coinSelection = new CoinSelection();
 module.exports = { CoinSelection: coinSelection };
