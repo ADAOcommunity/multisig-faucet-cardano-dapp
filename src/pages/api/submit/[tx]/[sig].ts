@@ -43,16 +43,16 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   const signatures = [signature, beSig];
   // let networkId = 1
   // const expirationTime = new Date();
-  // expirationTime.setTime(expirationTime.getTime() + (24 * 60 * 60 * 1000))  // 24hrs in milliseconds
+  // expirationTime.setTime(expirationTime.getTime() + (365 * 24 * 60 * 60 * 1000))  // 365*24hrs in milliseconds
   // let policy: IPolicy = await wallet.createLockingPolicyScript(networkId, expirationTime)
   // console.log("policy")
   // console.log(policy)
   // let polId = policy.id
-  // let polId = `10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8`
+  // let polId = `edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836`
 
   const meta: any = {
     '721': {
-      '10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8': {
+      'edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836': {
         TestADAONFT: {
           name: `TestADAONFT`,
           description: `This is a test TestADAONFT`,

@@ -53,12 +53,12 @@ export default function WalletConnect() {
             {address: "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", amount: "1"}, // Seller Wallet, NFT price 10ADA
             {address: `${myAddress}`,  amount: "0",
              mintedAssets:[{"assetName":"TestADAONFT","quantity":"1",
-            "policyId":"10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8","policyScript":"8201828200581c77491199a0c7465bdf3b330b4d941888b0e8770093b2a99a9fd8595282051a03141d50"}]} // NFTs to be minted
+            "policyId":"edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836","policyScript":"8201828200581c77491199a0c7465bdf3b330b4d941888b0e8770093b2a99a9fd8595282051a04f45abd"}]} // NFTs to be minted
             ]
 
         let dummyMetadata = {
             "721": {
-                "10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8": {
+                "edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836": {
                   "TestADAONFT": {
                     "name":"TestADAONFT",
                     "description":"This is a test TestADAONFT",
