@@ -35,7 +35,9 @@ export default async function(
   console.log("beSig")
   console.log(beSig)
   const signatures = [signature, beSig]
-
+  const txhash = await wallet.submitTx({transactionRaw: transaction, witnesses: [signature], scripts: null, networkId: 1})
+  console.log("txHash")
+  console.log(txhash)
   // const txHash = await wallet.submitTx({
   //   transactionRaw: transaction,
   //   witnesses: signatures,
@@ -45,5 +47,5 @@ export default async function(
   // console.log("txHash")
   // console.log(txHash)
 
-  res.status(200).json({ txSigned: "txHash" });
+  res.status(200).json(txhash);
 }
