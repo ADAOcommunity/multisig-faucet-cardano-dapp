@@ -63,7 +63,7 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   };
   // console.log("meta")
   // console.log(meta)
-  // const metaDataHash = wallet.hashMetadata(meta); //d1dec0a6c05fe16a95faa907dd5f873b67074a823eaf6337bfe408a0df7e53fa
+  // const metaDataHash = wallet.hashMetadata(meta); //cc694bce660a0d85db75a3100bfcd18f45f4d5e2991ba5b62466b328a8c6b1af
   // console.log(`metaDataHash`);
   // console.log(metaDataHash);
 

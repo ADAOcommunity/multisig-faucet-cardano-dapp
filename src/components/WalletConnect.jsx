@@ -75,7 +75,7 @@ export default function WalletConnect() {
             utxosRaw: utxos,
             recipients: recipients,
             metadata: dummyMetadata,
-            metadataHash: 'd1dec0a6c05fe16a95faa907dd5f873b67074a823eaf6337bfe408a0df7e53fa',
+            metadataHash: 'cc694bce660a0d85db75a3100bfcd18f45f4d5e2991ba5b62466b328a8c6b1af',
             addMetadata: false,
             multiSig: true,
             networkId: netId.id,
