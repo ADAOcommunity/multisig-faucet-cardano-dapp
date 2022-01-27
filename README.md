@@ -14,6 +14,8 @@
 
 <br />
 
+## Multisig minting example implemented<a href="https://github.com/ADADAO/multisig-faucet-cardano-dapp/tree/multisig-mint"> here</a> 
+
 ## Features
 
 - ⚡️ Next.js 12
