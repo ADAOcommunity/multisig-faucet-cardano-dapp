@@ -28,18 +28,23 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   // console.log(transaction)
   const wallet = new CardanoWalletBackend(blockfrostApiKey);
   // let privateKey = wallet.createNewBech32PrivateKey()
-  // console.log("witness")
+  // console.log("privateKey")
   // console.log(privateKey)
   wallet.setPrivateKey(
-    `xprv1qrwqn6suuugz7g06y28xhf28anqhfsv4xlejqk0eruscfzv2p39t969q6sg29e32x3nvpl4wx7ww3dl90s9ak0p0pqfx3pkscppt2g3n2esguwyzv3320x5hautp0uskc8ryskr3vr0kx4f9qnyje7dlfyulcnul`,
+    // privateKey
+    `xprv1cq59h28ua72fhd3y8nu6uhnwlwfz4atp65p59weht5fqsg3jvfgcnldqvsgwxz05gnzus7mmujc0xgcwvevmk4k685me9a3yyftttru6yrnmxm83t8mfvrzu9d6qf3s5vyq2vul4ckch206p43vmcffkmua8yd7t`,
+    'addr1vxpaycxf8q39q63ra82zswrdnfkpt2v555ecjztgqv4rw6ss3qyje'
   );
-  // let [txInputsFinal, recipientsFinal, metadata, fee] =
-  //   await wallet.decodeTransaction(transaction, 1);
-  // console.log('txInputsFinal, recipientsFinal, metadata, fee');
+  console.log("set privateKey")
+  
+  let [txInputsFinal, recipientsFinal, metadata, fee] = await wallet.decodeTransaction(transaction, 1);
+  // console.log("recipientsFinal");
   // console.log(recipientsFinal);
+  // console.log("txInputsFinal");
+  // console.log(txInputsFinal);
   const beSig = wallet.signTx(tx);
-  // console.log("beSig")
-  // console.log(beSig)
+  console.log("beSig")
+  console.log(beSig)
   const signatures = [signature, beSig];
   // let networkId = 1
   // const expirationTime = new Date();
@@ -50,17 +55,17 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   // let polId = policy.id
   // let polId = `edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836`
 
-  const meta: any = {
-    '721': {
-      'edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836': {
-        TestADAONFT: {
-          name: `TestADAONFT`,
-          description: `This is a test TestADAONFT`,
-          image: `ipfs://QmXLFXBRwRSodmxmGiEQ8d5u9jqMZxhUD5Umx5mdM3mNZp`,
-        },
-      },
-    },
-  };
+  // const meta: any = {
+  //   '721': {
+  //     'edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836': {
+  //       TestADAONFT: {
+  //         name: `TestADAONFT`,
+  //         description: `This is a test TestADAONFT`,
+  //         image: `ipfs://QmXLFXBRwRSodmxmGiEQ8d5u9jqMZxhUD5Umx5mdM3mNZp`,
+  //       },
+  //     },
+  //   },
+  // };
   // console.log("meta")
   // console.log(meta)
   // const metaDataHash = wallet.hashMetadata(meta); //cc694bce660a0d85db75a3100bfcd18f45f4d5e2991ba5b62466b328a8c6b1af
@@ -69,16 +74,19 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
 
   // const txhash = await wallet.submitTx({transactionRaw: transaction, witnesses: [signature], scripts: null, networkId: 1})
   // console.log('Pre-txHash');
-
+  // const beUtxos = await wallet.getAddressUtxos('addr1vxpaycxf8q39q63ra82zswrdnfkpt2v555ecjztgqv4rw6ss3qyje')
+  // console.log('beUtxos')
+  // console.log(beUtxos)
   const txHash = await wallet.submitTx({
     transactionRaw: transaction,
     witnesses: signatures,
     scripts: null,
-    metadata: meta,
+    // metadata: meta,
     networkId: 1,
   });
-  // console.log('txHash');
-  // console.log(txHash);
 
-  res.status(200).json(txHash);
+  console.log('txHash');
+  console.log(txHash);
+
+  res.status(200).json({txHash: txHash});
 }

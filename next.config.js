@@ -6,5 +6,9 @@ module.exports = {
     config.experiments = { asyncWebAssembly: true, layers: true }
 
     return config
+  },
+  env: {
+    WALLET_KEY: '',
+    WALLET_ADDRESS: ''
   }
 };

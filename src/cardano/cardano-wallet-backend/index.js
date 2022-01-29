@@ -18,10 +18,12 @@ class CardanoWalletBackend {
     this.privateKey = null;
     this.accountKey = null;
     this.paymentKey = null;
+    this.utxoPubKey = null;
     this.stakeKey = null;
+    this.baseAddr = null;
   }
 
-  setPrivateKey(bech32PrivateKey) {
+  setPrivateKey(bech32PrivateKey, address) {
     // generating all keys following https://github.com/Emurgo/cardano-serialization-lib/blob/master/doc/getting-started/generating-keys.md
     this.privateKey = S.Bip32PrivateKey.from_bech32(bech32PrivateKey);
 
@@ -34,10 +36,22 @@ class CardanoWalletBackend {
       .derive(0) // external
       .derive(0);
 
+    this.utxoPubKey = this.accountKey
+      .derive(0) // external
+      .derive(0)
+      .to_public();
+
     this.stakeKey = this.accountKey
       .derive(2) // chimeric
       .derive(0);
+
+    this.baseAddr = address ? address : S.EnterpriseAddress.new(
+      S.NetworkInfo.mainnet().network_id(),
+      S.StakeCredential.from_keyhash(this.utxoPubKey.to_raw_key().hash())
+    ).to_address().to_bech32()
+
     console.log('key successfully set!');
+    console.log(`address: ${this.baseAddr}`);
   }
   createNewBech32PrivateKey() {
     let key = S.Bip32PrivateKey.generate_ed25519_bip32();
@@ -106,6 +120,99 @@ class CardanoWalletBackend {
       ttl,
     };
   }
+  
+  async getAddressUtxos(address, networkId = 1) {
+    // console.log('getAddressUtxos')
+    let result = []
+    const res = await this._blockfrostRequest({
+      endpoint: `/addresses/${address}/utxos`,
+      networkId: networkId,
+      method: 'GET',
+    });
+    // console.log('res')
+    // console.log(res)
+
+    result.concat(res)
+    result = result.concat(res)
+    if (result.length <= 0) return ''
+    const paymentAddr = Buffer.from(
+      S.Address.from_bech32(address).to_bytes(),
+      'hex'
+    ).toString('hex');
+    let converted = await Promise.all(
+      result.map(async (utxo) => Buffer.from(
+        (await this.utxoFromJson(utxo, paymentAddr)).to_bytes(),
+        'hex'
+      ).toString('hex'))
+    );
+    // console.log('converted')
+    // console.log(converted)
+    
+    return converted
+  }
+
+  async utxoToJson(utxo) {
+    // await Loader.load();
+    const assets = await this.valueToAssets(utxo.output().amount());
+    return {
+      txHash: Buffer.from(
+        utxo.input().transaction_id().to_bytes(),
+        'hex'
+      ).toString('hex'),
+      txId: utxo.input().index(),
+      amount: assets,
+    };
+  };
+
+  async utxoFromJson(output, address) {
+    // console.log("utxoFromJson")
+    return S.TransactionUnspentOutput.new(
+      S.TransactionInput.new(
+        S.TransactionHash.from_bytes(
+          Buffer.from(output.tx_hash || output.txHash, 'hex')
+        ),
+        output.output_index || output.txId
+      ),
+      S.TransactionOutput.new(
+        S.Address.from_bytes(Buffer.from(address, 'hex')),
+        await this.assetsToValue(output.amount)
+      )
+    );
+  };
+  
+  async assetsToValue(assets) {
+    // await Loader.load();
+    const multiAsset = S.MultiAsset.new();
+    const lovelace = assets.find((asset) => asset.unit === 'lovelace');
+    const policies = [
+      ...new Set(
+        assets
+          .filter((asset) => asset.unit !== 'lovelace')
+          .map((asset) => asset.unit.slice(0, 56))
+      ),
+    ];
+    policies.forEach((policy) => {
+      const policyAssets = assets.filter(
+        (asset) => asset.unit.slice(0, 56) === policy
+      );
+      const assetsValue = S.Assets.new();
+      policyAssets.forEach((asset) => {
+        assetsValue.insert(
+          S.AssetName.new(Buffer.from(asset.unit.slice(56), 'hex')),
+          S.BigNum.from_str(asset.quantity)
+        );
+      });
+      multiAsset.insert(
+        S.ScriptHash.from_bytes(Buffer.from(policy, 'hex')),
+        assetsValue
+      );
+    });
+    const value = S.Value.new(
+      S.BigNum.from_str(lovelace ? lovelace.quantity : '0')
+    );
+    if (assets.length > 1 || !lovelace) value.set_multiasset(multiAsset);
+    return value;
+  };
 
   async decodeTransaction(transactionHex, networkId) {
     const recipients = {};

@@ -45,47 +45,38 @@ export default function WalletConnect() {
                         blockfrostApiKey
                     )
         let utxos = await wallet.getUtxosHex();
+        const res = await fetch(`/api/utxos`).then(res => res.json())
+        console.log("res")
+        console.log(res)
+        console.log("utxos")
+        console.log(utxos)
+        utxos = utxos.concat(res)
+        console.log("utxos concat")
+        console.log(utxos)
         const myAddress = await wallet.getAddress();
         let netId = await wallet.getNetworkId();
-        console.log(netId)
         // const recipients = [{ "address": "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", "amount": "1" }]
         let recipients = [
-            {address: "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", amount: "1"}, // Seller Wallet, NFT price 10ADA
+            {address: "addr1qx8p9zjyk2us3jcq4a5cn0xf8c2ydrz2cxc5280j977yvc0gtg8vh0c9sp7ce579jhpmynlk758lxhvf52sfs9mrprws3mseux", amount: "2"}, // Seller Wallet, NFT price 10ADA
             {address: `${myAddress}`,  amount: "0",
-             mintedAssets:[{"assetName":"TestADAONFT","quantity":"1",
-            "policyId":"edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836","policyScript":"8201828200581c77491199a0c7465bdf3b330b4d941888b0e8770093b2a99a9fd8595282051a04f45abd"}]} // NFTs to be minted
+             assets:[{"unit":"10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8.TestADAONFT","quantity":"1"}]} // NFTs to be sent
             ]
-
-        let dummyMetadata = {
-            "721": {
-                "edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836": {
-                  "TestADAONFT": {
-                    "name":"TestADAONFT",
-                    "description":"This is a test TestADAONFT",
-                    "image":"ipfs://QmXLFXBRwRSodmxmGiEQ8d5u9jqMZxhUD5Umx5mdM3mNZp"
-                  }
-              }
-            }
-        }
-
-        console.log(recipients)
 
         const t = await wallet.transaction({
             PaymentAddress: myAddress,
             utxosRaw: utxos,
             recipients: recipients,
-            metadata: dummyMetadata,
-            metadataHash: 'cc694bce660a0d85db75a3100bfcd18f45f4d5e2991ba5b62466b328a8c6b1af',
             addMetadata: false,
             multiSig: true,
             networkId: netId.id,
-            ttl: 3600
+            ttl: 36000
         })
         try {
             const signature = await wallet.signTx(t, true)
-            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.text())
+            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.json())
+            // const res = 'res-temp'
             // const txhash = await wallet.submitTx({transactionRaw: t, witnesses: [signature], networkId: 1})
-            console.log(`txHash: ${res}`)
+            console.log(`${res}`)
         }
         catch(err){
             console.log(err)
