@@ -1,9 +1,13 @@
 import React, { useState, useContext, Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
-import CardanoWallet, { Cardano } from "../cardano/cardano-wallet"
-import loader from '../cardano/cardano-wallet/loader'
+import CardanoWallet from "../cardano/cardano-wallet"
 import { Buffer } from 'buffer'
 import { ChevronDownIcon } from '@heroicons/react/solid'
+import useCardanoWallet from '@/cardano/cardano-wallet/useCardanoWallet'
+import { Address } from '@emurgo/cardano-serialization-lib-browser'
+import { useProtocolParametersQuery } from '@/cardano/cardano-wallet/query-api'
+import { ConfigContext } from '@/cardano/cardano-wallet/config'
+import { Recipient } from '@/cardano/cardano-wallet/types'
 // import WalletContext from '../utils/WalletContext'
 
 let wallet
@@ -12,19 +16,17 @@ const _Buffer = Buffer
 export default function WalletConnect() {
     let [address, setAddress] = useState('')
     let [connected, setConnected] = useState(false)
-    let [walletState, setWalletState] = useState()
-    // const walletCtx = useContext(WalletContext)
+    const [config, _] = useContext(ConfigContext)
+    let pParams = useProtocolParametersQuery(config);
+    let cardanoWallet = useCardanoWallet()
 
-    const setAddressBech32 = async (walletApi) => {
-        if(walletApi) {
-            await loader.load()
-            const loaded = typeof loader !== 'undefined'
-            console.log("loader")
-            console.log(loaded)
-            if(loaded) {
-                const loadedLoader = loader
-                const address = (await walletApi.getUsedAddresses())[0]
-                const addReadable = loadedLoader.Cardano.Address.from_bytes(_Buffer.from(address, 'hex')).to_bech32()
+    const setAddressBech32 = async () => {
+        console.log('setAddressBech32')
+        if(cardanoWallet && cardanoWallet.wallet) {
+            console.log(cardanoWallet)
+            const address = (await cardanoWallet.wallet.getUsedAddresses())[0]
+            if(address) {
+                const addReadable = Address.from_bytes(_Buffer.from(address.toString(), 'hex')).to_bech32()
                 console.log(addReadable)
                 setAddress(addReadable)
             }
@@ -32,51 +34,57 @@ export default function WalletConnect() {
     }
 
     const makeTx = async () => {
-        let blockfrostApiKey = {
-            0: "testnetRvOtxC8BHnZXiBvdeM9b3mLbi8KQPwzA", // testnet
-            1: "mainnetGHf1olOJblaj5LD8rcRudajSJGKRU6IL" // mainnet
-            }
+        if(!cardanoWallet) return
+        if(pParams.type !== 'ok') return
         
-        console.log("makeTx")
-        const S = await Cardano();
-        wallet = new CardanoWallet(
-                        S,
-                        walletState,
-                        blockfrostApiKey
-                    )
-        let utxos = await wallet.getUtxosHex();
-        const res = await fetch(`/api/utxos`).then(res => res.json())
-        console.log("res")
-        console.log(res)
-        console.log("utxos")
-        console.log(utxos)
-        utxos = utxos.concat(res)
-        console.log("utxos concat")
-        console.log(utxos)
-        const myAddress = await wallet.getAddress();
-        let netId = await wallet.getNetworkId();
-        // const recipients = [{ "address": "addr1qx4suzvst55qy2ppyu5c4x2kct23kv6r26n6nhckqn3f22sjftnu9ft6l5qr2x49r5kg3wda6les343sa9cpcxjz40sqst8yae", "amount": "1" }]
-        let recipients = [
-            {address: "addr1qx8p9zjyk2us3jcq4a5cn0xf8c2ydrz2cxc5280j977yvc0gtg8vh0c9sp7ce579jhpmynlk758lxhvf52sfs9mrprws3mseux", amount: "2"}, // Seller Wallet, NFT price 10ADA
-            {address: `${myAddress}`,  amount: "0",
-             assets:[{"unit":"10205d334b043dc986643a45cf0554943da622f0c0f31519d482c8f8.TestADAONFT","quantity":"1"}]} // NFTs to be sent
-            ]
-
-        const t = await wallet.transaction({
+        let utxos = await cardanoWallet.wallet?.getUtxos();
+        const myAddress = await cardanoWallet.getAddress();
+        const myAddressHex = await cardanoWallet.getAddressHexString();
+        let netId = await cardanoWallet.getNetworkId();
+        console.log({myAddress, netId})
+        const date = new Date()
+        const policy = await cardanoWallet.createLockingPolicyScript(myAddressHex, new Date(date.getTime() + 100*60000), pParams.data)
+        if(!policy) return
+        let recipients: Recipient[] = [
+            {address: "addr1qx8p9zjyk2us3jcq4a5cn0xf8c2ydrz2cxc5280j977yvc0gtg8vh0c9sp7ce579jhpmynlk758lxhvf52sfs9mrprws3mseux", amount: "1"}, // Seller Wallet, NFT price 10ADA
+            {address: `${myAddress}`,  amount: "0", mintedAssets: [{
+                assetName: 'TestDZ', policyId: policy.id, policyScript: policy.script, quantity: '1'
+            }]}
+        ]
+        let dummyMetadata = {
+            "721": {
+            "edf578cc1edc64c799812c541cef7343a5cb58cf85e109b1da91b836": {
+                    "TestADAONFT": {
+                    "name":"TestADAONFT",
+                    "description":"This is a test TestADAONFT",
+                    "image":"ipfs://QmXLFXBRwRSodmxmGiEQ8d5u9jqMZxhUD5Umx5mdM3mNZp"
+                    }
+                }
+            }
+        }
+        const t = await cardanoWallet.transaction({
+            ProtocolParameters: pParams.data,
             PaymentAddress: myAddress,
             utxosRaw: utxos,
             recipients: recipients,
             addMetadata: false,
-            multiSig: true,
+            multiSig: false,
             networkId: netId.id,
-            ttl: 36000
+            ttl: 36000,
+            metadata: dummyMetadata,
+            delegation: null,
+            metadataHash: 'cc694bce660a0d85db75a3100bfcd18f45f4d5e2991ba5b62466b328a8c6b1af'
         })
+        console.table(t)
         try {
-            const signature = await wallet.signTx(t, true)
-            const res = await fetch(`/api/submit/${t}/${signature}`).then(res => res.json())
-            // const res = 'res-temp'
-            // const txhash = await wallet.submitTx({transactionRaw: t, witnesses: [signature], networkId: 1})
-            console.log(`${res}`)
+            if(t){
+                console.log('t')
+                console.log(t)
+                const signature = await cardanoWallet.signTx(Buffer.from(t.to_bytes()).toString('hex'), false)
+                if(signature) {
+                    cardanoWallet.wallet?.submitTx(signature)
+                }
+            }
         }
         catch(err){
             console.log(err)
@@ -85,52 +93,12 @@ export default function WalletConnect() {
     }
 
     const enableCardano = async (wallet = 'nami') => {
-        const win = window
-
-        if(!win.cardano) return
-  
-        let baseWalletApi, fullWalletApi
-        switch(wallet){
-          case 'nami':
-            baseWalletApi = win.cardano.nami
-            break
-          case 'ccvault':
-            baseWalletApi = win.cardano.ccvault
-            break
-          case 'flint':
-            baseWalletApi = win.cardano.flint
-            break
-        default:
-            break
-        }
-  
-        switch(wallet){
-          case 'nami':
-            fullWalletApi = await baseWalletApi.enable()
-            break
-          case 'ccvault':
-            fullWalletApi = await baseWalletApi.enable()
-            break
-          case 'flint':
-            fullWalletApi = await baseWalletApi.enable()
-            break
-          default:
-            break
-        }
-
-        if(!await baseWalletApi.isEnabled()) return
-        else {
-            console.log(fullWalletApi)
-            wallet = fullWalletApi
-            setWalletState(fullWalletApi)
+        if(!(window as any).cardano) return
+        console.log('enableCardano')
+      
+        if(await cardanoWallet?.enable(wallet)) {
             setConnected(true)
-            setAddressBech32(fullWalletApi)
-            // try{
-                // walletCtx.update({walletApi: fullWalletApi})
-            // } catch(err){ 
-            //     console.log("walletCtx")
-            //     console.log(walletCtx)
-            // }
+            setAddressBech32()
         }
     }
 
@@ -151,7 +119,7 @@ export default function WalletConnect() {
 }
 
 
-function WalletDropdown({enableWallet, address}) {
+function WalletDropdown({enableWallet, address} : {enableWallet: any, address: string}) {
     return (
       <Menu as="div" className="relative inline-block text-left">
         <Menu.Button

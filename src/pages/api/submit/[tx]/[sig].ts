@@ -45,6 +45,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   const beSig = wallet.signTx(tx);
   console.log("beSig")
   console.log(beSig)
+  console.log("tx")
+  console.log(transaction)
   const signatures = [signature, beSig];
   // let networkId = 1
   // const expirationTime = new Date();
@@ -77,16 +79,16 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   // const beUtxos = await wallet.getAddressUtxos('addr1vxpaycxf8q39q63ra82zswrdnfkpt2v555ecjztgqv4rw6ss3qyje')
   // console.log('beUtxos')
   // console.log(beUtxos)
-  const txHash = await wallet.submitTx({
-    transactionRaw: transaction,
-    witnesses: signatures,
-    scripts: null,
-    // metadata: meta,
-    networkId: 1,
-  });
+  // const txHash = await wallet.submitTx({
+  //   transactionRaw: transaction,
+  //   witnesses: signatures,
+  //   scripts: null,
+  //   // metadata: meta,
+  //   networkId: 1,
+  // });
 
   console.log('txHash');
-  console.log(txHash);
+  console.log("txHash");
 
-  res.status(200).json({txHash: txHash});
+  res.status(200).json({txHash: "txHash"});
 }

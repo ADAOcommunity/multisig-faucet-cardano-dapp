@@ -122,15 +122,15 @@ class CardanoWalletBackend {
   }
   
   async getAddressUtxos(address, networkId = 1) {
-    // console.log('getAddressUtxos')
+    console.log('getAddressUtxos')
     let result = []
     const res = await this._blockfrostRequest({
       endpoint: `/addresses/${address}/utxos`,
       networkId: networkId,
       method: 'GET',
     });
-    // console.log('res')
-    // console.log(res)
+    console.log('res')
+    console.log(res)
 
     result.concat(res)
     result = result.concat(res)
